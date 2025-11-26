@@ -3,116 +3,166 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Khảo sát ý kiến người dùng</title>
+    <title>Khảo sát người dùng</title>
     <style>
         body {
-            font-family: "Times New Roman", Times, serif !important;
+            font-family: "Times New Roman", Times, serif;
             max-width: 800px;
             margin: 0 auto;
             padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
         #form-container {
             margin: 20px 0;
         }
         #message {
-            padding: 15px;
+            padding: 20px;
             border-radius: 5px;
             margin: 20px 0;
+            text-align: center;
+            font-size: 18px;
             display: none;
         }
-        .success { background-color: #d4edda; color: #155724; }
-        .warning { background-color: #fff3cd; color: #856404; }
+        .success { 
+            background-color: #d4edda; 
+            color: #155724; 
+            border: 1px solid #c3e6cb;
+        }
+        .warning { 
+            background-color: #fff3cd; 
+            color: #856404; 
+            border: 1px solid #ffeaa7;
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
-    <h1>Khảo sát ý kiến người dùng</h1>
-    <p>Cảm ơn bạn đã tham gia khảo sát! Mỗi thiết bị chỉ được tham gia một lần.</p>
-    
-    <div id="message" class="warning">
-        Bạn đã tham gia khảo sát này trước đây. Mỗi thiết bị chỉ được gửi một lần.
-    </div>
-    
-    <div id="form-container">
-        <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSeCUHBgqg7HXLoNJB05tm6U5vwZGp4cBVWgI1rZVfXHAcWO0A/viewform?embedded=true" 
-                width="100%" 
-                height="800" 
-                frameborder="0" 
-                marginheight="0" 
-                marginwidth="0">
-            Đang tải...
-        </iframe>
+    <div class="container">
+        <h1>Khảo sát Ý kiến Người dùng</h1>
+        <p style="text-align: center;">Cảm ơn bạn đã tham gia khảo sát! Mỗi thiết bị chỉ được tham gia một lần.</p>
+        
+        <div id="message" class="warning">
+            Bạn đã tham gia khảo sát này trước đây. Mỗi thiết bị chỉ được gửi một lần.
+        </div>
+        
+        <div id="form-container">
+            <!-- THAY THẾ YOUR_GOOGLE_FORM_EMBED_URL BẰNG URL THỰC TẾ CỦA BẠN -->
+            <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSeCUHBgqg7HXLoNJB05tm6U5vwZGp4cBVWgI1rZVfXHAcWO0A/viewform?embedded=true" 
+                    width="100%" 
+                    height="800" 
+                    frameborder="0" 
+                    marginheight="0" 
+                    marginwidth="0"
+                    id="survey-frame">
+                Đang tải...
+            </iframe>
+        </div>
     </div>
 
     <script>
-        // Kiểm tra local storage khi trang load
-        document.addEventListener('DOMContentLoaded', function() {
-            const formSubmitted = localStorage.getItem('surveySubmitted');
-            const messageDiv = document.getElementById('message');
-            const formContainer = document.getElementById('form-container');
+        // Code JavaScript đơn giản và dễ debug
+        console.log("JavaScript đang chạy...");
+        
+        // Kiểm tra Local Storage khi trang load
+        function checkSubmission() {
+            const submitted = localStorage.getItem('surveySubmitted');
+            console.log("Trạng thái Local Storage:", submitted);
             
-            if (formSubmitted) {
-                // Đã submit trước đó
-                messageDiv.style.display = 'block';
-                formContainer.style.display = 'none';
+            if (submitted === 'true') {
+                // Đã submit trước đó - Ẩn form, hiện thông báo
+                document.getElementById('message').style.display = 'block';
+                document.getElementById('form-container').style.display = 'none';
+                console.log("Đã phát hiện user đã submit - Ẩn form");
             } else {
-                // Theo dõi sự kiện submit form
-                startFormMonitoring();
+                // Chưa submit - Bắt đầu theo dõi
+                console.log("User chưa submit - Bắt đầu theo dõi");
+                startMonitoring();
             }
-        });
-
-        function startFormMonitoring() {
-            // Kiểm tra mỗi 2 giây xem form đã được submit chưa
-            const checkInterval = setInterval(function() {
-                const iframe = document.querySelector('iframe');
+        }
+        
+        // Theo dõi form submission
+        function startMonitoring() {
+            console.log("Bắt đầu theo dõi form...");
+            
+            // Kiểm tra mỗi 2 giây
+            const checkInterval = setInterval(() => {
+                const iframe = document.getElementById('survey-frame');
                 if (iframe) {
-                    try {
-                        // Kiểm tra URL của iframe - khi submit thành công sẽ chuyển hướng
-                        const currentUrl = iframe.src || iframe.contentWindow.location.href;
+                    const currentSrc = iframe.src;
+                    console.log("Đang kiểm tra iframe src:", currentSrc);
+                    
+                    // Kiểm tra các dấu hiệu đã submit
+                    if (currentSrc.includes('/formResponse') || 
+                        currentSrc.includes('thankyou') || 
+                        currentSrc.includes('response')) {
                         
-                        if (currentUrl.includes('/formResponse') || 
-                            currentUrl.includes('thankyou') || 
-                            currentUrl.includes('response')) {
-                            
-                            // Đánh dấu đã submit
-                            localStorage.setItem('surveySubmitted', 'true');
-                            localStorage.setItem('submitTime', new Date().toISOString());
-                            
-                            clearInterval(checkInterval);
-                            
-                            // Hiển thị thông báo
-                            showThankYouMessage();
-                        }
-                    } catch (e) {
-                        // Bỏ qua lỗi cross-origin
-                        console.log('Không thể truy cập iframe content');
+                        console.log("ĐÃ PHÁT HIỆN FORM SUBMIT!");
+                        localStorage.setItem('surveySubmitted', 'true');
+                        localStorage.setItem('submitTime', new Date().toISOString());
+                        
+                        clearInterval(checkInterval);
+                        showThankYouMessage();
                     }
                 }
             }, 2000);
-        }
-
-        function showThankYouMessage() {
-            const messageDiv = document.getElementById('message');
-            const formContainer = document.getElementById('form-container');
             
-            messageDiv.textContent = 'Cảm ơn bạn đã tham gia khảo sát! Câu trả lời của bạn đã được ghi nhận.';
-            messageDiv.className = 'success';
-            messageDiv.style.display = 'block';
-            formContainer.style.display = 'none';
-        }
-
-        // Thêm event listener cho beforeunload (khi người dùng rời trang)
-        window.addEventListener('beforeunload', function() {
-            const iframe = document.querySelector('iframe');
-            if (iframe) {
-                try {
-                    const iframeUrl = iframe.src || iframe.contentWindow.location.href;
-                    if (iframeUrl.includes('/formResponse')) {
-                        localStorage.setItem('surveySubmitted', 'true');
-                    }
-                } catch (e) {
-                    // Bỏ qua lỗi cross-origin
+            // Cũng kiểm tra khi user rời trang
+            window.addEventListener('beforeunload', function() {
+                const iframe = document.getElementById('survey-frame');
+                if (iframe && iframe.src.includes('/formResponse')) {
+                    localStorage.setItem('surveySubmitted', 'true');
                 }
-            }
+            });
+        }
+        
+        // Hiện thông báo cảm ơn
+        function showThankYouMessage() {
+            console.log("Hiển thị thông báo cảm ơn");
+            const message = document.getElementById('message');
+            message.textContent = 'Cảm ơn bạn đã tham gia khảo sát! Câu trả lời của bạn đã được ghi nhận.';
+            message.className = 'success';
+            message.style.display = 'block';
+            document.getElementById('form-container').style.display = 'none';
+        }
+        
+        // Thêm nút reset để test (sẽ tự động ẩn khi deploy)
+        function addTestButton() {
+            const testBtn = document.createElement('button');
+            testBtn.innerHTML = '🔧 TEST: Reset Form';
+            testBtn.onclick = function() {
+                localStorage.removeItem('surveySubmitted');
+                alert('Đã reset! Form sẽ hiện lại khi refresh trang.');
+                location.reload();
+            };
+            testBtn.style.cssText = `
+                position: fixed; 
+                top: 10px; 
+                right: 10px; 
+                background: #e74c3c; 
+                color: white; 
+                border: none; 
+                padding: 10px; 
+                border-radius: 5px; 
+                cursor: pointer;
+                z-index: 1000;
+            `;
+            document.body.appendChild(testBtn);
+        }
+        
+        // Khởi động
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log("Trang đã load xong");
+            checkSubmission();
+            addTestButton(); // Thêm nút test
         });
     </script>
 </body>
